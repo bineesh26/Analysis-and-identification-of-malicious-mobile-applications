@@ -1,0 +1,201 @@
+{
+    "app_name": "\u2063 \u2063 \u2063",
+    "package": "ghost.protocol.x",
+    "version_name": "67.8",
+    "version_code": "1",
+    "permissions": [
+        {
+            "name": "android.permission.READ_EXTERNAL_STORAGE",
+            "risk": "medium"
+        },
+        {
+            "name": "android.permission.ACCESS_ADSERVICES_AD_ID",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.MANAGE_OWN_CALLS",
+            "risk": "low"
+        },
+        {
+            "name": "com.google.android.c2dm.permission.RECEIVE",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.ACCESS_NETWORK_STATE",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.FOREGROUND_SERVICE",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.USE_FULL_SCREEN_INTENT",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.POST_NOTIFICATIONS",
+            "risk": "low"
+        },
+        {
+            "name": "com.google.android.gms.permission.AD_ID",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.SYSTEM_ALERT_WINDOW",
+            "risk": "high"
+        },
+        {
+            "name": "android.permission.INTERNET",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.ACCESS_ADSERVICES_TOPICS",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.ACCESS_COARSE_LOCATION",
+            "risk": "medium"
+        },
+        {
+            "name": "android.permission.WAKE_LOCK",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+            "risk": "low"
+        },
+        {
+            "name": "ghost.protocol.x.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+            "risk": "low"
+        },
+        {
+            "name": "android.permission.WRITE_EXTERNAL_STORAGE",
+            "risk": "medium"
+        }
+    ],
+    "activities": [
+        "com.applovin.mediation.MaxDebuggerActivity",
+        "com.applovin.mediation.MaxDebuggerDetailActivity",
+        "com.applovin.mediation.MaxDebuggerMultiAdActivity",
+        "com.applovin.mediation.MaxDebuggerAdUnitsListActivity",
+        "com.applovin.mediation.MaxDebuggerAdUnitWaterfallsListActivity",
+        "com.applovin.mediation.MaxDebuggerAdUnitDetailActivity",
+        "com.applovin.mediation.MaxDebuggerCmpNetworksListActivity",
+        "com.applovin.mediation.MaxDebuggerTcfConsentStatusesListActivity",
+        "com.applovin.mediation.MaxDebuggerTcfInfoListActivity",
+        "com.applovin.mediation.MaxDebuggerTcfStringActivity",
+        "com.applovin.mediation.MaxDebuggerTestLiveNetworkActivity",
+        "com.applovin.mediation.MaxDebuggerTestModeNetworkActivity",
+        "com.applovin.mediation.MaxDebuggerWaterfallKeywordsActivity",
+        "com.applovin.creative.MaxCreativeDebuggerActivity",
+        "com.applovin.creative.MaxCreativeDebuggerDisplayedAdActivity",
+        "com.external.InterstitialActivity",
+        "com.fyber.fairbid.sdk.testsuite.views.TestSuiteActivity",
+        "com.fyber.ads.ofw.OfferWallActivity",
+        "com.unity3d.services.ads.adunit.AdUnitActivity",
+        "com.unity3d.services.ads.adunit.AdUnitTransparentActivity",
+        "com.unity3d.services.ads.adunit.AdUnitTransparentSoftwareActivity",
+        "com.unity3d.services.ads.adunit.AdUnitSoftwareActivity",
+        "com.unity3d.ads.adplayer.FullScreenWebViewDisplay",
+        "com.chartboost.sdk.view.CBImpressionActivity",
+        "com.chartboost.sdk.internal.clickthrough.EmbeddedBrowserActivity",
+        "com.vungle.ads.internal.ui.VungleActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTLandingPageActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTPlayableLandingPageActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTVideoLandingPageLink2Activity",
+        "com.bytedance.sdk.openadsdk.activity.TTDelegateActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTWebsiteActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTAppOpenAdActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTRewardVideoActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTRewardExpressVideoActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTFullScreenVideoActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTFullScreenExpressVideoActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTInterstitialActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTInterstitialExpressActivity",
+        "com.bytedance.sdk.openadsdk.activity.TTAdActivity",
+        "net.pubnative.lite.sdk.interstitial.activity.MraidInterstitialActivity",
+        "net.pubnative.lite.sdk.interstitial.activity.VastInterstitialActivity",
+        "net.pubnative.lite.sdk.rewarded.activity.MraidRewardedActivity",
+        "net.pubnative.lite.sdk.rewarded.activity.VastRewardedActivity",
+        "net.pubnative.lite.sdk.contentinfo.AdFeedbackActivity",
+        "com.applovin.sdk.AppLovinWebViewActivity",
+        "com.mbridge.msdk.activity.MBCommonActivity",
+        "com.mbridge.msdk.out.LoadingActivity",
+        "com.mbridge.msdk.newreward.player.MBRewardVideoActivity",
+        "com.mbridge.msdk.reward.player.MBRewardVideoActivity",
+        "sg.bigo.ads.ad.splash.AdSplashActivity",
+        "sg.bigo.ads.ad.splash.LandscapeAdSplashActivity",
+        "sg.bigo.ads.controller.form.AdFormActivity",
+        "yjju.urpj.Ll",
+        "sg.bigo.ads.api.AdActivity",
+        "yjju.urpj.atphm",
+        "sg.bigo.ads.api.PopupAdActivity",
+        "yjju.urpj.Imkr",
+        "sg.bigo.ads.api.LandingStyleableActivity",
+        "yjju.urpj.ceke",
+        "sg.bigo.ads.api.LandscapeAdActivity",
+        "yjju.urpj.XI",
+        "sg.bigo.ads.api.CompanionAdActivity",
+        "yjju.urpj.xLWh",
+        "sg.bigo.ads.api.LandscapeCompanionAdActivity",
+        "yjju.urpj.Xjd",
+        "sg.bigo.ads.core.mraid.MraidVideoActivity",
+        "yjju.urpj.UbLMi",
+        "com.fyber.inneractive.sdk.activities.InneractiveInternalBrowserActivity",
+        "com.google.android.gms.common.api.GoogleApiActivity",
+        "com.fyber.inneractive.sdk.activities.InneractiveFullscreenAdActivity",
+        "com.applovin.adview.AppLovinFullscreenActivity",
+        "com.fyber.inneractive.sdk.activities.InneractiveRichMediaVideoPlayerActivityCore",
+        "com.fyber.inneractive.sdk.activities.InternalStoreWebpageActivity",
+        "com.applovin.mediation.hybridAds.MaxHybridMRecAdActivity",
+        "com.fyber.inneractive.sdk.activities.FyberReportAdActivity",
+        "com.applovin.mediation.hybridAds.MaxHybridNativeAdActivity",
+        "com.google.android.gms.ads.AdActivity",
+        "com.facebook.ads.AudienceNetworkActivity"
+    ],
+    "services": [
+        "com.applovin.impl.adview.activity.FullscreenAdService",
+        "com.chartboost.sdk.internal.video.repository.exoplayer.VideoRepositoryDownloadService",
+        "com.bytedance.sdk.openadsdk.multipro.aidl.BinderPoolService",
+        "com.google.android.datatransport.runtime.backends.TransportBackendDiscovery",
+        "com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService",
+        "com.chartboost.sdk.internal.video.repository.exoplayer.VideoRepositoryDownloadService",
+        "com.google.firebase.components.ComponentDiscoveryService",
+        "com.startapp.android.publish.common.metaData.PeriodicMetaDataService",
+        "com.startapp.android.publish.common.metaData.InfoEventService",
+        "yjju.urpj.QJ",
+        "com.startapp.android.publish.common.metaData.PeriodicJobService",
+        "yjju.urpj.xrPJh",
+        "com.bytedance.sdk.openadsdk.multipro.aidl.BinderPoolService",
+        "com.google.android.gms.ads.AdService",
+        "yjju.urpj.Yk",
+        "com.google.firebase.messaging.FirebaseMessagingService"
+    ],
+    "receivers": [
+        "yjju.urpj.WqiFh",
+        "yjju.urpj.meuK",
+        "com.google.firebase.iid.FirebaseInstanceIdReceiver",
+        "com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver",
+        "androidx.profileinstaller.ProfileInstallReceiver",
+        "com.mbridge.msdk.foundation.same.broadcast.NetWorkChangeReceiver",
+        "com.mbridge.msdk.foundation.same.broadcast.NetWorkChangeReceiver",
+        "net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver"
+    ],
+    "providers": [
+        "com.squareup.picasso.PicassoProvider",
+        "com.google.firebase.provider.FirebaseInitProvider",
+        "yjju.urpj.xCl",
+        "androidx.startup.InitializationProvider",
+        "yjju.urpj.NIx"
+    ],
+    "embedded_libs": [],
+    "found_urls": [],
+    "suspicious_strings": [],
+    "signature_hashes": [],
+    "static_score": 55,
+    "score": 55,
+    "risk_level": "High Risk",
+    "file_name": "Netflix_-_v9.24.0_-_Premium.apk",
+    "scan_date": "2025-08-13T23:11:45.609551",
+    "report_id": "19435b2d-66b8-4f95-ab51-8039ecbaec51"
+}

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MAIA: Malicious Application Identification and Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        /* --- card styles (kept from original) --- */
+        .analysis-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 20px auto;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .analysis-card h2 { margin-bottom: 10px; font-size: 20px; color: #333; }
+        .file-info { font-weight: bold; margin-bottom: 15px; color: #555; }
+        .risk-level { font-size: 18px; font-weight: bold; padding: 8px 15px; border-radius: 8px; display: inline-block; margin-bottom: 10px; }
+        .risk-low { background-color: #c8f7c5; color: #2e7d32; }
+        .risk-medium { background-color: #fff3cd; color: #856404; }
+        .risk-high { background-color: #f8d7da; color: #721c24; }
+        .description { font-size: 14px; color: #666; }
+
+        body { font-family: 'Inter', sans-serif; }
+        .animated-bg {
+            background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .glassmorphism {
+            background: rgba(22, 33, 62, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .glassmorphism:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .analysis-item { transition: background-color 0.2s ease-in-out; }
+        .analysis-item:hover { background-color: rgba(255,255,255,0.03); }
+
+        /* small responsive tweak */
+        #permissions-list { min-height: 48px; }
+        .sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border:0; }
+    </style>
+</head>
+<body class="animated-bg text-gray-100">
+<div class="container mx-auto p-4 md:p-8">
+    <!-- Header -->
+    <header class="text-center mb-8 md:mb-12">
+        <h1 class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500">MAIA</h1>
+        <p class="text-lg md:text-xl text-gray-300 mt-2 tracking-wider">Malicious Application Identification and Analysis</p>
+    </header>
+
+
+    <main>
+        <!-- Upload Section -->
+        <div id="home-section">
+        <div id="upload-section" class="glassmorphism rounded-2xl p-6 md:p-8 shadow-2xl" aria-labelledby="upload-title">
+            <h2 id="upload-title" class="text-2xl font-semibold mb-6 text-center text-white">Upload an APK for Analysis</h2>
+
+            <div class="flex items-center justify-center w-full">
+                <label id="upload-label" for="apk-upload" tabindex="0" class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer bg-black/20 hover:bg-black/30 transition-colors duration-300" role="button" aria-describedby="upload-desc">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-cyan-300 mb-4" aria-hidden="true"></i>
+                        <p class="mb-2 text-sm text-gray-300"><span class="font-semibold text-white">Click to upload</span> or drag and drop</p>
+                        <p id="upload-desc" class="text-xs text-gray-400">Android Application Package (.apk)</p>
+                    </div>
+                    <input id="apk-upload" type="file" class="hidden" accept=".apk" aria-label="Choose APK file to upload"/>
+                </label>
+            </div>
+
+            <div id="file-info" class="mt-4 text-center text-gray-300 hidden" role="status" aria-live="polite">
+                <p><i class="fas fa-file-shield mr-2 text-cyan-300"></i><span id="file-name"></span> (<span id="file-size"></span>)</p>
+            </div>
+        </div>
+    </div>
+
+
+        <!-- Analysis Section -->
+<!-- Results + report layout -->
+<div id="progress-container" class="w-full bg-black/20 rounded-full h-6 mb-8 shadow-inner" hidden>
+    <div id="progress-bar" class="bg-gradient-to-r from-cyan-400 to-blue-600 h-6 rounded-full text-center text-white text-sm font-semibold leading-6 transition-all duration-00" style="width: 0%">Analyzing...</div>
+</div>
+
+<!-- Analysis Section -->
+<div id="analysis-section" class="hidden mt-8" aria-live="polite">
+    <div class="flex justify-end gap-4 mb-4">
+        <button id="new-scan-btn" 
+            class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-semibold shadow-lg hover:from-blue-600 hover:to-cyan-500 transition-all">
+            <i class="fas fa-plus-circle mr-2"></i>New Scan
+        </button>
+        <button id="print-report-btn" 
+            class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-400 text-white font-semibold shadow-lg hover:from-green-600 hover:to-emerald-500 transition-all">
+            <i class="fas fa-print mr-2"></i>Print Report
+        </button>
+    </div>
+
+    <div class="text-white text-lg text-center mt-10">
+        <i class="fas fa-shield-alt text-cyan-400 text-3xl mb-4"></i>
+        <p class="text-xl font-semibold">Analysis Complete!</p>
+        <p class="text-sm text-gray-300 mt-2">Your file has been analyzed. Please check the downloadable report or scan another APK.</p>
+    </div>
+</div>
+
+
+                <!-- Left Column (static + dynamic) -->
+                <div id="left-column" class="space-y-8 hidden">
+                    <div class="glassmorphism rounded-2xl p-6 shadow-lg" aria-labelledby="static-title">
+                        <h3 id="static-title" class="text-2xl font-bold mb-4 text-cyan-300"><i class="fas fa-microscope mr-2"></i>Static Analysis</h3>
+
+                        <!-- Small summary card -->
+                        <div id="analysisResults" class="analysis-card hidden" aria-hidden="true">
+                            <h2>Analysis Result</h2>
+                            <div class="file-info"><span id="apkName"></span></div>
+                            <div class="risk-level" id="small-risk-level" aria-hidden="true"></div>
+                            <p id="finalDescription" class="description"></p>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="text-lg font-semibold mb-2 text-blue-300">Application Details</h4>
+                            <div class="bg-black/20 p-4 rounded-lg space-y-2">
+                                <p><strong><i class="fas fa-file-signature mr-2 w-4 text-center"></i>App Name:</strong> <span id="app-name">N/A</span></p>
+                                <p><strong><i class="fas fa-fingerprint mr-2 w-4 text-center"></i>Package Name:</strong> <span id="package-name">N/A</span></p>
+                                <p><strong><i class="fas fa-code-branch mr-2 w-4 text-center"></i>Version:</strong> <span id="app-version">N/A</span></p>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+
+                    <div class="glassmorphism rounded-2xl p-6 shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-cyan-300"><i class="fas fa-bolt mr-2"></i>Dynamic Analysis</h3>
+                        <div id="dynamic-analysis-results" class="space-y-4">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-2 text-blue-300">Network Activity</h4>
+                                <div id="network-activity" class="bg-black/20 p-4 rounded-lg space-y-2 text-sm">No dynamic network data available</div>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-2 text-blue-300">File System Activity</h4>
+                                <div id="filesystem-activity" class="bg-black/20 p-4 rounded-lg space-y-2 text-sm">No dynamic filesystem data available</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+
+                
+
+                    <!-- Cards container (results list) -->
+                    <div id="cards-container" class="glassmorphism rounded-2xl p-6 shadow-lg hidden">
+                        <h4 class="text-lg font-semibold mb-4 text-blue-300">Scan Results</h4>
+                        <div id="cards-wrap" class="grid grid-cols-1 md:grid-cols-1 gap-4" aria-live="polite">
+                            <!-- result cards appended here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+/* --- DOM refs --- */
+const apkUpload = document.getElementById('apk-upload');
+const uploadLabel = document.getElementById('upload-label');
+const fileInfo = document.getElementById('file-info');
+const fileNameEl = document.getElementById('file-name');
+const fileSizeEl = document.getElementById('file-size');
+const uploadSection = document.getElementById('upload-section');
+const analysisSection = document.getElementById('analysis-section');
+const progressContainer = document.getElementById('progress-container');
+const progressBar = document.getElementById('progress-bar');
+
+const appName = document.getElementById('app-name');
+const packageName = document.getElementById('package-name');
+const appVersion = document.getElementById('app-version');
+const permissionsList = document.getElementById('permissions-list');
+const networkActivity = document.getElementById('network-activity');
+const filesystemActivity = document.getElementById('filesystem-activity');
+
+const reportCard = document.getElementById('report-card');
+const reportIcon = document.getElementById('report-icon');
+const riskScore = document.getElementById('risk-score');
+const reportRiskLevel = document.getElementById('report-risk-level');
+const reportSummary = document.getElementById('report-summary');
+
+const cardsWrap = document.getElementById('cards-wrap');
+const analysisResultsCard = document.getElementById('analysisResults');
+const smallRiskLevelEl = document.getElementById('small-risk-level');
+const finalDescriptionEl = document.getElementById('finalDescription');
+
+let progressInterval = null;
+
+/* --- accessibility: allow keyboard activation of label --- */
+uploadLabel.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        apkUpload.click();
+    }
+});
+
+/* --- drop support --- */
+uploadLabel.addEventListener('dragover', (e) => { e.preventDefault(); uploadLabel.classList.add('opacity-90'); });
+uploadLabel.addEventListener('dragleave', () => uploadLabel.classList.remove('opacity-90'));
+uploadLabel.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadLabel.classList.remove('opacity-90');
+    if (e.dataTransfer && e.dataTransfer.files) {
+        apkUpload.files = e.dataTransfer.files;
+        // Trigger change event
+        apkUpload.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+});
+
+/* --- main upload handler --- */
+apkUpload.addEventListener('change', async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+    
+
+    // Update file info UI
+    fileNameEl.textContent = files.map(f => f.name).join(', ');
+    fileSizeEl.textContent = (files[0] && typeof files[0].size === 'number')
+        ? formatBytes(files[0].size)
+        : '';
+
+    fileInfo.classList.remove('hidden');
+
+    // Prepare form
+    const formData = new FormData();
+    files.forEach(file => formData.append('apk', file));
+
+    // Start progress
+    startProgress();
+
+    let results = null;
+    try {
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        results = await res.json();
+    } catch (err) {
+        stopProgress();
+        progressBar.style.width = '100%';
+        progressBar.textContent = 'Upload failed';
+        showError(`Upload/analysis error: ${err.message}`);
+        return;
+    }
+
+    // Finish progress and show results
+    finishProgress(results);
+});
+
+/* --- progress helpers --- */
+function startProgress() {
+    clearInterval(progressInterval);
+    progressContainer.hidden = false;
+    progressBar.style.width = '0%';
+    progressBar.textContent = 'Analyzing... 0%';
+    let p = 0;
+    progressInterval = setInterval(() => {
+        if (p < 90) { // keep climbing until 90%
+            p += Math.random() * 4 + 2; // 2–6% per tick
+            p = Math.min(p, 90);
+            progressBar.style.width = `${p}%`;
+            progressBar.textContent = `Analyzing... ${Math.floor(p)}%`;
+        }
+    }, 100); // updates twice as fast
+}
+
+function finishProgress(results) {
+    clearInterval(progressInterval);
+
+    // Smooth final push to 100%
+    let finalP = parseFloat(progressBar.style.width) || 90;
+    const step = () => {
+        finalP += 2;
+        if (finalP >= 100) {
+            finalP = 100;
+            progressBar.style.width = '100%';
+            progressBar.textContent = 'Analysis Complete!';
+
+            setTimeout(() => {
+                progressContainer.hidden = true;
+                uploadSection.classList.add('hidden');
+                analysisSection.classList.remove('hidden');
+                if (results) {
+    analysisSection.classList.remove('hidden');
+    document.getElementById('left-column').classList.remove('hidden');
+    document.getElementById('cards-container').classList.remove('hidden'); // ✅ Show cards
+    renderResults(Array.isArray(results) ? results : [results]);
+}
+
+
+            }, 400);
+        } else {
+            progressBar.style.width = `${finalP}%`;
+            progressBar.textContent = `Analyzing... ${Math.floor(finalP)}%`;
+            requestAnimationFrame(step);
+        }
+    };
+    requestAnimationFrame(step);
+}
+
+
+
+
+/* --- utility --- */
+function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return '0 B';
+    const sizes = ['B','KB','MB','GB','TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
+}
+function escapeHtml(unsafe) {
+    if (unsafe === null || unsafe === undefined) return '';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+function showError(msg) {
+    cardsWrap.innerHTML = '';
+    const err = document.createElement('div');
+    err.className = 'p-4 bg-red-800 rounded-lg text-sm';
+    err.textContent = msg;
+    cardsWrap.appendChild(err);
+}
+
+/* --- risk helpers --- */
+function classifyRiskFromName(name) {
+    if (!name) return 'low';
+    const p = String(name).toUpperCase();
+    if (p.includes('RECORD') || p.includes('SMS') || p.includes('CALL') || p.includes('CONTACT')) return 'high';
+    if (p.includes('LOCATION') || p.includes('EXTERNAL') || p.includes('CAMERA')) return 'medium';
+    return 'low';
+}
+function riskBadge(risk) {
+    const base = 'text-xs font-bold uppercase px-2 py-1 rounded-full bg-black/20';
+    if (!risk) return `<span class="${base} text-gray-300">unknown</span>`;
+    if (risk === 'low') return `<span class="${base} text-green-400">low</span>`;
+    if (risk === 'medium') return `<span class="${base} text-yellow-400">medium</span>`;
+    if (risk === 'high') return `<span class="${base} text-red-400">high</span>`;
+    return `<span class="${base} text-gray-300">${escapeHtml(risk)}</span>`;
+}
+function renderRiskPill(text) {
+    const t = (text || '').toLowerCase();
+    if (t.includes('critical')) return `<span class="text-xs font-bold uppercase px-3 py-1 rounded-full text-red-400 bg-black/20">Critical Risk</span>`;
+    if (t.includes('high')) return `<span class="text-xs font-bold uppercase px-3 py-1 rounded-full text-yellow-400 bg-black/20">High Risk</span>`;
+    return `<span class="text-xs font-bold uppercase px-3 py-1 rounded-full text-green-400 bg-black/20">Low Risk</span>`;
+}
+
+/* --- main rendering --- */
+function renderResults(results) {
+    // clear cards area (do not remove the report section or left static summary)
+    cardsWrap.innerHTML = '';
+
+    // header
+    const header = document.createElement('div');
+    header.className = 'mb-2';
+    header.innerHTML = `<div class="text-sm text-gray-300">Scan Results</div>
+                        <div class="text-xl font-semibold text-white">${results.length} file(s) scanned</div>`;
+    cardsWrap.appendChild(header);
+
+    // create card per result
+    results.forEach((r, idx) => {
+        const fileNameShort = (r.file_name || r.file || r.name || 'unknown').toString().split('/').pop();
+
+        // permissions html (safe)
+        let permsHtml = '<div class="space-y-1">';
+        if (Array.isArray(r.permissions) && r.permissions.length) {
+            r.permissions.forEach(p => {
+                const pname = p && p.name ? p.name : String(p || '');
+                const risk = (p && p.risk) ? p.risk : classifyRiskFromName(pname);
+                permsHtml += `<div class="flex items-center justify-between p-2 rounded-md bg-black/10">
+                    <span class="truncate"><i class="fas fa-shield-alt mr-3"></i>${escapeHtml(pname)}</span>
+                    ${riskBadge(risk)}
+                </div>`;
+            });
+        } else {
+            permsHtml += `<div class="p-2 rounded-md bg-black/10 text-sm text-gray-300">No permissions found</div>`;
+        }
+        permsHtml += '</div>';
+
+        let urlsHtml = '<div class="space-y-1">';
+        if (Array.isArray(r.found_urls) && r.found_urls.length) {
+            r.found_urls.slice(0,6).forEach(u => urlsHtml += `<div class="truncate text-sm text-gray-300 p-1">${escapeHtml(u)}</div>`);
+            if (r.found_urls.length > 6) urlsHtml += `<div class="text-xs text-gray-400">+${r.found_urls.length - 6} more</div>`;
+        } else urlsHtml += `<div class="text-sm text-gray-400 p-1">No URLs found</div>`;
+        urlsHtml += '</div>';
+
+        const score = typeof r.score === 'number' ? r.score : (typeof r.static_score === 'number' ? r.static_score : 0);
+        const riskLevelText = r.risk_level || (score >= 75 ? 'Critical Risk' : score >= 40 ? 'High Risk' : 'Low Risk');
+
+        const card = document.createElement('div');
+        card.className = 'glassmorphism rounded-2xl p-4 shadow-lg';
+        card.innerHTML = `
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <div class="text-sm text-gray-300">File</div>
+                    <div class="text-lg font-semibold text-white">${escapeHtml(fileNameShort)}</div>
+                    <div class="text-xs text-gray-400 mt-1">${escapeHtml(r.app_name || 'N/A')} • ${escapeHtml(r.package || 'N/A')}</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-300">Score</div>
+                    <div class="text-2xl font-bold">${escapeHtml(score)}</div>
+                    <div class="mt-1">${renderRiskPill(riskLevelText)}</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="text-sm font-semibold text-blue-300 mb-2">Permissions</div>
+                ${permsHtml}
+            </div>
+            <div class="mb-3">
+                <div class="text-sm font-semibold text-blue-300 mb-2">Found URLs</div>
+                ${urlsHtml}
+            </div>
+            <div class="mt-2 text-sm text-gray-400">Scanned: ${escapeHtml(r.scan_date || '')}</div>
+        `;
+        cardsWrap.appendChild(card);
+
+        // populate the main left + summary using first result
+        if (idx === 0) populateMainReport(r);
+    });
+}
+
+/* --- populate left and summary (first result) --- */
+function populateMainReport(r) {
+    appName.textContent = r.app_name || 'N/A';
+    packageName.textContent = r.package || 'N/A';
+    appVersion.textContent = r.version_name || r.version_code || 'N/A';
+
+    // small analysis card content
+    analysisResultsCard.classList.remove('hidden');
+    document.getElementById('apkName').textContent = r.file_name || r.file || r.name || 'N/A';
+    const smallRisk = r.risk_level ? r.risk_level.toLowerCase() : classifyRiskFromName(r.package || r.app_name);
+    smallRiskLevelEl.textContent = smallRisk;
+    smallRiskLevelEl.className = `risk-level ${smallRisk === 'low' ? 'risk-low' : smallRisk === 'medium' ? 'risk-medium' : 'risk-high'}`;
+    finalDescriptionEl.textContent = r.summary || r.description || 'No description provided.';
+
+    // permissions list
+    permissionsList.innerHTML = '';
+    if (Array.isArray(r.permissions) && r.permissions.length) {
+        r.permissions.forEach(p => {
+            const pname = p && p.name ? p.name : String(p || '');
+            const risk = (p && p.risk) ? p.risk : classifyRiskFromName(pname);
+            const item = document.createElement('div');
+            item.className = 'mb-2 flex items-center justify-between p-2 rounded-md bg-black/10 analysis-item';
+            const iconClass = risk === 'high' ? 'fa-skull-crossbones text-red-400' : risk === 'medium' ? 'fa-exclamation-triangle text-yellow-400' : 'fa-shield-alt text-green-400';
+            item.innerHTML = `<span class="truncate"><i class="fas ${iconClass} mr-3"></i>${escapeHtml(pname)}</span>
+                              <span class="text-xs font-bold uppercase px-2 py-1 rounded-full bg-black/20 ${risk === 'high' ? 'text-red-400' : risk === 'medium' ? 'text-yellow-400' : 'text-green-400'}">${escapeHtml(risk)}</span>`;
+            permissionsList.appendChild(item);
+        });
+    } else {
+        permissionsList.innerHTML = `<div class="text-sm text-gray-300 p-2">No permissions detected</div>`;
+    }
+
+    // dynamic placeholders (unless provided)
+    networkActivity.textContent = (r.network_activity && r.network_activity.length) ? r.network_activity.join(', ') : 'No dynamic network data available';
+    filesystemActivity.textContent = (r.filesystem_activity && r.filesystem_activity.length) ? r.filesystem_activity.join(', ') : 'No dynamic filesystem data available';
+
+    // report card
+    const score = typeof r.score === 'number' ? r.score : (typeof r.static_score === 'number' ? r.static_score : 0);
+    riskScore.textContent = `${score}`;
+
+    if (score >= 75) {
+        reportRiskLevel.textContent = 'Critical Risk';
+        reportRiskLevel.className = 'text-2xl font-bold text-red-400';
+        reportIcon.className = 'fas fa-skull-crossbones fa-6x text-red-400 mb-4 animate-pulse';
+        reportCard.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+        reportSummary.textContent = 'CRITICAL: The application exhibits highly suspicious behavior.';
+    } else if (score >= 40) {
+        reportRiskLevel.textContent = 'High Risk';
+        reportRiskLevel.className = 'text-2xl font-bold text-yellow-400';
+        reportIcon.className = 'fas fa-exclamation-triangle fa-6x text-yellow-400 mb-4';
+        reportCard.style.borderColor = 'rgba(250, 204, 21, 0.5)';
+        reportSummary.textContent = 'WARNING: This application requests several sensitive permissions and exhibits questionable behavior.';
+    } else {
+        reportRiskLevel.textContent = 'Low Risk';
+        reportRiskLevel.className = 'text-2xl font-bold text-green-400';
+        reportIcon.className = 'fas fa-check-circle fa-6x text-green-400 mb-4';
+        reportCard.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+        reportSummary.textContent = 'The application appears to be safe based on static analysis.';
+    }
+}
+document.getElementById('new-scan-btn').addEventListener('click', () => {
+    document.getElementById('analysis-section').classList.add('hidden');
+    document.getElementById('left-column').classList.add('hidden');
+    document.getElementById('cards-container').classList.add('hidden'); // ✅ Hide cards
+    document.getElementById('upload-section').classList.remove('hidden');
+
+    document.getElementById('file-info').classList.add('hidden');
+    document.getElementById('apk-upload').value = '';
+    document.getElementById('cards-wrap').innerHTML = '';
+});
+
+
+
+document.getElementById('print-report-btn').addEventListener('click', () => {
+    window.print();
+});
+
+
+</script>
+</body>
+</html>
